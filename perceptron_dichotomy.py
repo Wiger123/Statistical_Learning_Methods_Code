@@ -29,11 +29,12 @@ def loadData(fileName):
     dataArr = [];
     labelArr = [];
 
-    # 打开文件
+    # 打开文件, 按行读取
     df = pd.read_csv(fileName, header=None)
     # 获取数据 list
     dataArr = df.iloc[:, 1:]
     # 获取标签 list
+    # 0-9: 标记, 由于是二分任务, 将 >= 5 的作为 1, < 5 为 -1
     labelArr = pd.Series((num >= 5) for num in df.iloc[:, 0]).map({True: 1, False: -1})
 
     return dataArr, labelArr
