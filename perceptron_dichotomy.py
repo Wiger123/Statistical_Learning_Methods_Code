@@ -9,8 +9,29 @@
 测试集数量: 10000
 ---------------
 运行结果:
+迭代次数: 20
+正确率: 79.64%
+运行时长: 67.38s
+---------------
+运行结果:
+迭代次数: 30
 正确率: 81.72%
 运行时长: 61.47s
+---------------
+运行结果:
+迭代次数: 40
+正确率: 82.01%
+运行时长: 81.59s
+---------------
+运行结果:
+迭代次数: 50
+正确率: 81.41%
+运行时长: 101.58s
+---------------
+运行结果:
+迭代次数: 60
+正确率: 79.66%
+运行时长: 123.00s
 '''
 
 import pandas as pd
@@ -188,7 +209,7 @@ def test(dataArr, labelArr, w, b):
 #     testData, testLabel = pd.loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_test.csv")
 #
 #     # 训练获得权重和正确率
-#     w, b = pd.perceptron(trainData, trainLabel, 30)
+#     w, b = pd.perceptron(trainData, trainLabel, 60)
 #
 #     # 测试获得正确率
 #     accuracyRate = pd.test(testData, testLabel, w, b)
