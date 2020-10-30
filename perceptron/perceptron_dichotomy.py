@@ -52,11 +52,11 @@ def loadData(fileName):
     dataArr = [];
     labelArr = [];
 
-    # 打开文件
-    fr = open(fileName, 'r')
-
-    # 逐行读取
-
+    # # 经典逐行读取
+    #
+    # # 打开文件
+    # fr = open(fileName, 'r')
+    #
     # # 按行读取文件
     # for line in fr.readlines():
     #
@@ -75,14 +75,14 @@ def loadData(fileName):
     # pandas 读取, 更为简便
 
     # 打开文件, 按行读取
-    df = pd.read_csv(fileName, header=None)
+    df = pd.read_csv(fileName, header = None)
 
     # 获取数据 list
     # 此处需要整除255进行归一化
     dataArr = df.iloc[:, 1:] / 255
 
     # 获取标签 list
-    # 0-9: 标记, 由于是二分任务, 将 >= 5 的作为 1, < 5 为 -1
+    # 0 - 9: 标记, 由于是二分任务, 将 >= 5 的作为 1, < 5 为 -1
     labelArr = pd.Series((num >= 5) for num in df.iloc[:, 0]).map({True: 1, False: -1})
 
     # 数据读取结束
@@ -199,20 +199,21 @@ def test(dataArr, labelArr, w, b):
 
 # 主函数
 # if __name__ == '__main__':
+#
 #     # 获取当前时间, 作为起始时间
 #     startTime = time.time()
 #
 #     # 获取训练数据
-#     trainData, trainLabel = pd.loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_train.csv")
+#     trainData, trainLabel = loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_train.csv")
 #
 #     # 获取测试数据
-#     testData, testLabel = pd.loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_test.csv")
+#     testData, testLabel = loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_test.csv")
 #
 #     # 训练获得权重和正确率
-#     w, b = pd.perceptron(trainData, trainLabel, 60)
+#     w, b = perceptron(trainData, trainLabel, 60)
 #
 #     # 测试获得正确率
-#     accuracyRate = pd.test(testData, testLabel, w, b)
+#     accuracyRate = test(testData, testLabel, w, b)
 #
 #     # 获取当前时间, 作为结束时间
 #     endTime = time.time()
