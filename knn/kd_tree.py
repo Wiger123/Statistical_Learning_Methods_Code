@@ -38,30 +38,36 @@ class KDTree(object):
     kd 树类
     '''
 
-    def __init__(self, dataMat, labelMat):
+    def __init__(self, dataArr, labelArr):
         '''
         kd 树初始化
-        :param dataMat: 数据矩阵
-        :param labelMat: 标签矩阵
+        :param dataArr: 数据数组
+        :param labelArr: 标签数组
         '''
 
         # 长度不可手动修改
         self.__length = 0
 
         # 根节点, 私有属性, 不可手动修改
-        self.__root = self.__create(dataMat, labelMat)
+        self.__root = self.__create(dataArr, labelArr)
 
-    def __create(self, dataMat, labelMat, parentNode = None):
+    def __create(self, dataArr, labelArr, parentNode = None):
         '''
         创建 kd 树
-        :param dataMat: 数据矩阵: 行数代表样本数, 列数表示特征数
-        :param labelMat: 标签矩阵
+        :param dataArr: 数据数组: 行数代表样本数, 列数表示特征数
+        :param labelArr: 标签数组
         :param parentNode: 父结点
         :return: 根节点
         '''
 
+        # 数据数组
+        dataArray = np.array(dataArr)
+
         # 数组尺寸: m: 样本数 n: 特征数
-        m, n = dataMat.shape
+        m, n = dataArray.shape
+
+        # 标签数组
+        labelArray = np.array(labelArr).reshape(m, 1)
 
         # 样本集为空
         if m == 0:
@@ -69,16 +75,20 @@ class KDTree(object):
 
         # 根节点的切分超平面选择: 特征方差最大
         # 计算所有特征方差: n * 1
-        varList = [np.var(dataMat[:, col]) for col in range(n)]
+        varList = [np.var(dataArray[:, col]) for col in range(n)]
 
         # 最大特征方差索引
         maxIndex = varList.index(max(varList))
 
         # 该特征值升序排序: m * 1
-        sortedVarList = np.argsort(dataMat[:, maxIndex])
+        sortedVarList = dataArray[:, maxIndex].argsort()
 
         # 选取该特征中位数样本点: 1 * 1
-        midItemIndex = sortedVarList[m // 2]
+        # 转为 int 型
+        midItemIndex = int(sortedVarList[m // 2])
+
+        # 打印新结点序号
+        # print('New Node:', midItemIndex)
 
         # 样本数目为 1
         if m == 1:
@@ -87,17 +97,17 @@ class KDTree(object):
             self.__length += 1
 
             # 返回 midItemIndex 的数据, 标签和特征, 父结点和左右子树均为空
-            return Node(item = dataMat[midItemIndex], label= labelMat[midItemIndex], dim = maxIndex, parent = parentNode, left_child = None, right_child = None)
+            return Node(item = dataArray[midItemIndex], label= int(labelArray[midItemIndex]), dim = maxIndex, parent = parentNode, left_child = None, right_child = None)
 
         # 样本数目 > 1, 生成结点
-        node = Node(item = [midItemIndex], label= labelMat[midItemIndex], dim = maxIndex, parent = parentNode, left_child = None, right_child = None)
+        node = Node(item = dataArray[midItemIndex], label= int(labelArray[midItemIndex]), dim = maxIndex, parent = parentNode, left_child = None, right_child = None)
 
         # 左子树数据: (m // 2) * n
         # 该特征量上, 值小于等于该结点的样品 index 列表
-        left_data = dataMat[sortedVarList[:m // 2]]
+        left_data = dataArray[sortedVarList[:m // 2]]
 
         # 左子树标签: (m // 2) * n
-        left_label = labelMat[sortedVarList[:m // 2]]
+        left_label = labelArray[sortedVarList[:m // 2]]
 
         # 左子树结点
         left_child = self.__create(left_data, left_label, node)
@@ -113,10 +123,10 @@ class KDTree(object):
 
             # 右子树数据: (m // 2) * n
             # 该特征量上, 值大于等于该结点的样品 index 列表
-            right_data = dataMat[sortedVarList[m // 2 + 1:]]
+            right_data = dataArray[sortedVarList[m // 2 + 1:]]
 
             # 右子树标签: (m // 2) * n
-            right_label = labelMat[sortedVarList[m // 2 + 1:]]
+            right_label = labelArray[sortedVarList[m // 2 + 1:]]
 
             # 右子树结点
             right_child = self.__create(right_data, right_label, node)
@@ -134,7 +144,6 @@ class KDTree(object):
         return node
 
     # 方法作为属性调用
-
     # 树的结点个数
     @property
     def length(self):
@@ -145,10 +154,10 @@ class KDTree(object):
     def root(self):
         return self.__root
 
-    def find_nearest_neighbour(self, item):
+    def _find_nearest_neighbour(self, item):
         '''
         寻找最近邻点
-        :param item: 预测样本向量
+        :param item: 需要预测的样本向量
         :return: 距离最近的样本向量
         '''
 
