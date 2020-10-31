@@ -125,10 +125,19 @@ def test_with_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, top
     # 开始训练
     print('START TRAINING')
 
+    # 获取当前时间, 作为起始时间
+    kdTreeStartTime = time.time()
+
     # 建立 kd 树
     kdRoot = kd.KDTree(trainDataArr, trainLabelArr)
 
-    kd.KDTree.find_nearest_neighbour(kdRoot)
+    # 获取当前时间, 作为结束时间
+    kdTreeEndTime = time.time()
+
+    # 显示用时时长
+    print('kd Tree Time Span:', kdTreeEndTime - kdTreeStartTime)
+
+    kd.KDTree.search_node_region()
 
 def test_without_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
     '''

@@ -20,7 +20,7 @@ class Node(object):
         结点初始化
         :param item: 结点数据(样本信息)
         :param label: 结点标签
-        :param dim: 结点切分的维度(特征)
+        :param dim: 特征
         :param parent: 父结点
         :param left_child: 左子树
         :param right_child: 右子树
@@ -154,11 +154,89 @@ class KDTree(object):
     def root(self):
         return self.__root
 
-    def _find_nearest_neighbour(self, item):
+    def search_node_region(self, item):
         '''
-        寻找最近邻点
+        寻找当前结点在 kd 树中位于哪个结点的区域中
         :param item: 需要预测的样本向量
-        :return: 距离最近的样本向量
+        :return: 所在区域的的结点
         '''
 
-        print(item)
+        # item 需要转为数组
+        itemArray = np.array(item)
+
+        # 空树
+        if self.length == 0:
+            return None
+
+        # 递归找距离测试点最近叶结点
+        node = self.root
+
+        # 仅一个样本
+        if self.length == 1:
+            return node
+
+        # 递归搜索该样本所在的叶结点区域
+        while True:
+
+            # 当前结点特征
+            cur_dim = node.dim
+
+            # 样本向量的该特征值 = 结点的该特征值
+            if item[cur_dim] == node.item[cur_dim]:
+                # 返回当前结点
+                return node
+
+            # 样本向量的该特征值 < 结点的该特征值
+            elif item[cur_dim] < node.item[cur_dim]:
+
+                # 若左子树为空
+                if node.left_child == None:
+
+                    # 返回自身结点
+                    return node
+
+                # 若左子树非空, 进入左子树
+                node = node.left_child
+
+            # 样本向量的该特征值 > 结点的该特征值
+            else:
+
+                # 若右子树为空
+                if node.right_child == None:
+
+                    # 返回自身结点
+                    return node
+
+                # 若右子树非空, 进入右子树
+                node = node.right_child
+
+# 主函数
+if __name__ == '__main__':
+
+    # 测试数据
+    dataArray = np.array([[19, 2], [7, 0], [13, 5], [3, 15], [3, 4], [3, 2], [8, 9], [9, 3], [17, 15], [11, 11]])
+
+    # 测试标签
+    labelArray = np.array([[0], [1], [0], [1], [1], [1], [0], [1], [1], [1]])
+
+    # 获取当前时间
+    Time1 = time.time()
+
+    # 构造 kd 树
+    kd_tree = KDTree(dataArray, labelArray)
+
+    # 获取当前时间
+    Time2 = time.time()
+
+    # 获取样本所在结点区域
+    node = KDTree.search_node_region(kd_tree, [12, 7])
+
+    # 获取当前时间
+    Time3 = time.time()
+
+    # 显示用时时长
+    print('Create kd-Tree:', Time2 - Time1)
+
+    # 显示用时时长
+    print('Search kd-Tree:', Time3 - Time2)
+
