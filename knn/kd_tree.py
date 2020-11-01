@@ -210,6 +210,119 @@ class KDTree(object):
                 # 若右子树非空, 进入右子树
                 node = node.right_child
 
+    def transfer_list(self, node, kdList = []):
+        '''
+        通过遍历 kd 树, 获取所有结点, 转化为列表嵌套字典
+        :param node: 传入的根结点
+        :param kdList: 返回嵌套字典的列表
+        :return:
+        '''
+
+        # 树为空
+        if node == None:
+
+            # 返回空列表
+            return None
+
+        # 列表新的一项
+        element_dict = {}
+
+        # 结点向量
+        element_dict['item'] = tuple(node.item)
+
+        # 结点标签
+        element_dict['label'] = node.label
+
+        # 结点特征
+        element_dict['dim'] = node.dim
+
+        # 父结点, 没有时传回 None
+        element_dict['parent'] = tuple(node.parent.item) if node.parent else None
+
+        # 左子结点, 没有时传回 None
+        element_dict['left_child'] = tuple(node.left_child.item) if node.left_child else None
+
+        # 右子结点, 没有时传回 None
+        element_dict['right_child'] = tuple(node.right_child.item) if node.right_child else None
+
+        # 列表添加新项
+        kdList.append(element_dict)
+
+        # 左子树递归
+        self.transfer_list(node.left_child, kdList)
+
+        # 右子树递归
+        self.transfer_list(node.right_child, kdList)
+
+        # 返回列表
+        return kdList
+
+    def search_nearest_node(self, item, k):
+        '''
+        寻找距离测试样本距离最近的前 k 个样本
+        :param item: 测试样本
+        :param k: 距离最近的样本个数
+        :return: 返回距离样本最近的前 k 个样本标签
+        '''
+
+        # 树的总结点数少于等于 k 个
+        if self.length <= k:
+
+            # 标签集合
+            label_dict = {}
+
+            # 获取所有结点列表
+            kdList = self.transfer_list(self.root)
+
+            # 获取所有标签
+            for element in kdList:
+
+                # 当前标签已存在时
+                if element['label'] in label_dict:
+
+                    # 标签数目加一
+                    label_dict[element['label']] += 1
+
+                # 当前标签不存在时
+                else:
+
+                    # 创建该标签
+                    label_dict[element['label']] = 1
+
+            # 根据标签数目排序
+            sorted_label = sorted(label_dict.items(), key = lambda x : x[1], reverse = True)
+
+            # 返回标签列表
+            return sorted_label
+
+        # 树的总结点数多于 k 个
+        else:
+
+            # 测试样本转为数组类型
+            item = np.array(item)
+
+            # 找到最近结点
+            node = self.search_node_region(item)
+
+            # 判断是否为空树
+            if node == None:
+
+                # 返回空结果
+                return None
+
+            # k 个最近点的列表
+            node_list = []
+
+            # 测试点与最近点之间距离 ( 欧几里得距离 )
+            distance = np.sqrt(sum((item - node.item) ** 2))
+
+            # 最短距离
+            min_dis = distance
+
+            # 返回上一个父结点, 判断以测试点为圆心, distance 为半径的圆是否与父结点分隔超平面相交, 若相交, 则说明父结点的另一个子树可能存在更近的点
+            node_list.append([distance, tuple(node.item), node.label[0]])
+
+
 # 主函数
 if __name__ == '__main__':
 
@@ -217,7 +330,7 @@ if __name__ == '__main__':
     dataArray = np.array([[19, 2], [7, 0], [13, 5], [3, 15], [3, 4], [3, 2], [8, 9], [9, 3], [17, 15], [11, 11]])
 
     # 测试标签
-    labelArray = np.array([[0], [1], [0], [1], [1], [1], [0], [1], [1], [1]])
+    labelArray = np.array([[0], [2], [0], [5], [1], [5], [0], [1], [1], [1]])
 
     # 获取当前时间
     Time1 = time.time()
@@ -229,10 +342,14 @@ if __name__ == '__main__':
     Time2 = time.time()
 
     # 获取样本所在结点区域
-    node = KDTree.search_node_region(kd_tree, [12, 7])
+    node = kd_tree.search_node_region([12, 7])
 
     # 获取当前时间
     Time3 = time.time()
+
+    # 显示最近的 k 个元素
+    k_nodes = kd_tree.search_nearest_node(12, 30)
+    print(k_nodes)
 
     # 显示用时时长
     print('Create kd-Tree:', Time2 - Time1)
