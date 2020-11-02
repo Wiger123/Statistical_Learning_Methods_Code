@@ -266,6 +266,34 @@ class KDTree(object):
         # 返回列表
         return kdList
 
+    def get_brother_node(self, node):
+        '''
+        获取兄弟结点
+        :param node: 当前结点
+        :return: 当前结点兄弟结点
+        '''
+
+        # 根节点无兄弟结点
+        if node == self.root:
+
+            # 返回空
+            return None
+
+        # 父结点
+        parent_node = node.parent
+
+        # 该结点是父结点的左子树
+        if node == parent_node.left_child:
+
+            # 返回右子树
+            return parent_node.right_child
+
+        # 该结点是父结点的右子树
+        else:
+
+            # 返回左子树
+            return parent_node.left_child
+
     def search_nearest_node(self, item, k):
         '''
         寻找距离测试样本距离最近的前 k 个样本
@@ -305,6 +333,7 @@ class KDTree(object):
             return sorted_label
 
         # 树的总结点数多于 k 个
+        # Wiger 于 2020-11-02 重新撰写
         else:
 
             # 测试样本转为数组类型
@@ -318,6 +347,12 @@ class KDTree(object):
 
                 # 返回空结果
                 return None
+
+            # 保存访问过的结点
+            node_visited = set()
+
+            # 最近叶子结点已访问过
+            node_visited.add(node)
 
             # 最近的 k 个结点列表
             node_list = []
@@ -343,12 +378,26 @@ class KDTree(object):
                 # 获取父结点
                 parent = node.parent
 
+                # 父结点未被访问过
+                if parent not in node_visited:
+
+                    # 加入访问集合
+                    node_visited.add(parent)
+
+                # 父结点已被访问过
+                else:
+
+                    # 向上爬一层
+                    node = parent
+
+                    # 跳过本次循环
+                    continue
+
                 # 父结点与测试点距离
                 dist_par = calcDist(item, parent.item)
 
-                # 父结点距离与当前最短距离做比较
-                # 判断结点列表是否已满, 在列表未满的状态下, 即使父结点距离大于当前最短距离, 仍需要进行添加
-                if k > len(node_list) or dist_par < dist_min:
+                # 判断结点列表是否已满, 在列表数目未到 k 个的状态下, 需要添加当前结点
+                if k > len(node_list):
 
                     # 结点列表添加父结点
                     node_list.append([dist_par, tuple(parent.item), parent.label])
@@ -356,42 +405,69 @@ class KDTree(object):
                     # 结点列表按照距离排序
                     node_list.sort()
 
-                    # 数目未达到 k 个时更新最短距离
-                    if k >= len(node_list):
+                # 列表已经达到 k 个点
+                else:
 
-                        # 需要考察的最短距离为倒数第一个
-                        # 例如此时距离为: k = 5, [1, 2, 3], 后续加入的如果比 3 小, 仍然可以加入, 如果大于 3 直接跳过
-                        dist_min = node_list[-1][0]
+                    # 父结点与测试点距离小于列表里最长距离时
+                    if dist_par < node_list[-1][0]:
 
-                    # 数目已达到 k 个时更新最短距离
-                    else:
+                        # 列表去掉最长距离
+                        node_list.pop()
 
-                        # 最短距离为第 k 个
-                        dist_min = node_list[k - 1][0]
+                        # 结点列表添加父结点
+                        node_list.append([dist_par, tuple(parent.item), parent.label])
 
-                # 判断父结点的另一个子树与结点列表中的最大元素构成的圆是否有交集
-                # 根据在同一特征上的距离判断进行甄别
-                # 判断结点列表是否已满
-                if k > len(node_list) or abs(item[parent.dim] - parent.item[parent.dim]) < dist_min:
+                        # 结点列表按照距离排序
+                        node_list.sort()
 
-                    # 父结点的另一子树与圆有交集
-                    # 该结点非父结点的左子节点
-                    if parent.left_child != node:
+                # 判断父结点的另一子节点( 兄弟结点 )是否为空, 如果为空, 可以直接向上爬一层, 无需继续计算切分线距离
+                if self.get_brother_node(node) == None:
 
-                        # 兄弟结点为左结点
-                        node_bro = parent.left_child
+                    # 跳过本次循环, 向上爬一层
+                    continue
 
-                    # 该结点非父结点的右子节点
-                    else:
+                # 计算样本点和父结点区域切分线的距离
 
-                        # 兄弟结点为右结点
-                        node_bro = parent.right_child
-
-                    # 兄弟结点是否存在
-                    if node_bro != None:
-
-                        # 若更近点在该兄弟结点左侧
-                        if item[parent.dim] <= node_bro.item[node_bro.dim]:
+            #
+            #         # 数目未达到 k 个时更新最短距离
+            #         if k >= len(node_list):
+            #
+            #             # 需要考察的最短距离为倒数第一个
+            #             # 例如此时距离为: k = 5, [1, 2, 3], 后续加入的如果比 3 小, 仍然可以加入, 如果大于 3 直接跳过
+            #             dist_min = node_list[-1][0]
+            #
+            #         # 数目已达到 k 个时更新最短距离
+            #         else:
+            #
+            #             # 最短距离为第 k 个
+            #             dist_min = node_list[k - 1][0]
+            #
+            #     # 判断父结点的另一个子树与结点列表中的最大元素构成的圆是否有交集
+            #     # 根据在同一特征上的距离判断进行甄别
+            #     # 判断结点列表是否已满
+            #     if k > len(node_list) or abs(item[parent.dim] - parent.item[parent.dim]) < dist_min:
+            #
+            #         # 父结点的另一子树与圆有交集
+            #         # 该结点非父结点的左子节点
+            #         if parent.left_child != node:
+            #
+            #             # 兄弟结点为左结点
+            #             node_bro = parent.left_child
+            #
+            #         # 该结点非父结点的右子节点
+            #         else:
+            #
+            #             # 兄弟结点为右结点
+            #             node_bro = parent.right_child
+            #
+            #         # 兄弟结点是否存在
+            #         if node_bro != None:
+            #
+            #             # 若更近点在该兄弟结点左侧
+            #             if item[parent.dim] <= node_bro.item[node_bro.dim]:
+            #
+            #                 # 向兄弟结点左子树进行搜索
+            #                 return
 
 # 主函数
 if __name__ == '__main__':
@@ -418,8 +494,7 @@ if __name__ == '__main__':
     Time3 = time.time()
 
     # 显示最近的 k 个元素
-    k_nodes = kd_tree.search_nearest_node(12, 30)
-    print(k_nodes)
+    k_nodes = kd_tree.search_nearest_node([12, 7], 3)
 
     # 显示用时时长
     print('Create kd-Tree:', Time2 - Time1)
