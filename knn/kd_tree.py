@@ -94,10 +94,10 @@ class KDTree(object):
 
         # 左子树数据: (m // 2) * n
         # 该特征量上, 值小于等于该结点的样品 index 列表
-        left_data = dataMat[sortedVarList[:m // 2]]
+        left_data = dataMat[sortedVarList[:m // 2], :]
 
         # 左子树标签: (m // 2) * n
-        left_label = labelMat[sortedVarList[:m // 2]]
+        left_label = labelMat[sortedVarList[:m // 2], :]
 
         # 左子树结点
         left_child = self.__create(left_data, left_label, node)
@@ -113,10 +113,10 @@ class KDTree(object):
 
             # 右子树数据: (m // 2) * n
             # 该特征量上, 值大于等于该结点的样品 index 列表
-            right_data = dataMat[sortedVarList[m // 2 + 1:]]
+            right_data = dataMat[sortedVarList[m // 2 + 1:], :]
 
             # 右子树标签: (m // 2) * n
-            right_label = labelMat[sortedVarList[m // 2 + 1:]]
+            right_label = labelMat[sortedVarList[m // 2 + 1:], :]
 
             # 右子树结点
             right_child = self.__create(right_data, right_label, node)
