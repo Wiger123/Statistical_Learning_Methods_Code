@@ -111,7 +111,35 @@ def getNearest(trainDataMat, trainLabelMat, x, topK):
     # 返回票数最多的标签
     return labelList.index(max(labelList))
 
-def test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
+def test_with_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
+    '''
+    测试正确率
+    :param trainDataArr: 训练数据集
+    :param trainLabelArr: 训练标签集
+    :param testDataArr: 测试数据集
+    :param testLabelArr: 测试标签集
+    :param topK: 选择邻近点数目, 默认 25
+    :return: 正确率
+    '''
+
+    # 开始训练
+    print('START TRAINING')
+
+    # 获取当前时间, 作为起始时间
+    kdTreeStartTime = time.time()
+
+    # 建立 kd 树
+    kdRoot = kd.KDTree(trainDataArr, trainLabelArr)
+
+    # 获取当前时间, 作为结束时间
+    kdTreeEndTime = time.time()
+
+    # 显示用时时长
+    print('kd Tree Time Span:', kdTreeEndTime - kdTreeStartTime)
+
+    kd.KDTree.search_node_region()
+
+def test_without_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
     '''
     测试正确率
     :param trainDataArr: 训练数据集
@@ -137,26 +165,21 @@ def test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
     # 错误分类样本计数
     errorCount = 0
 
-    # # 不借助 kd 树, 仅测试 200 个样本点
-    # for i in range(200):
-    #
-    #     # 当前测试样本向量
-    #     x = testDataMat[i]
-    #
-    #     # 预测当前向量标记
-    #     y = getNearest(trainDataMat, trainLabelMat, x, topK)
-    #
-    #     # 若测试标签与实际不符, 错误样本计数 + 1
-    #     if y != testLabelMat[i]:
-    #         errorCount += 1
-    #
-    #     # 打印测试进度
-    #     print('TEST %d:%d' % (i, 200))
+    # 不借助 kd 树, 仅测试 200 个样本点
+    for i in range(200):
 
-    # kd 树
-    kdRoot = kd.KDTree(trainDataMat, trainLabelMat)
+        # 当前测试样本向量
+        x = testDataMat[i]
 
-    kd.KDTree.find_nearest_neighbour(kdRoot)
+        # 预测当前向量标记
+        y = getNearest(trainDataMat, trainLabelMat, x, topK)
+
+        # 若测试标签与实际不符, 错误样本计数 + 1
+        if y != testLabelMat[i]:
+            errorCount += 1
+
+        # 打印测试进度
+        print('TEST %d:%d' % (i, 200))
 
     # 返回正确率
     return 1 - (errorCount / 200)
@@ -168,13 +191,13 @@ if __name__ == '__main__':
     startTime = time.time()
 
     # 获取训练数据
-    trainData, trainLabel = loadData("D:\\Mnist\\mnist_train.csv")
+    trainData, trainLabel = loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_train.csv")
 
     # 获取测试数据
-    testData, testLabel = loadData("D:\\Mnist\\mnist_test.csv")
+    testData, testLabel = loadData("G:\\Statistical-Learning-Method_Code-master\\Mnist\\mnist_test.csv")
 
     # 测试获得正确率
-    accuracyRate = test(trainData, trainLabel, testData, testLabel, 25)
+    accuracyRate = test_with_kdtree(trainData, trainLabel, testData, testLabel, 25)
 
     # 获取当前时间, 作为结束时间
     endTime = time.time()
