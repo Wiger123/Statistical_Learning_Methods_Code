@@ -442,6 +442,9 @@ class KDTree(object):
             # 获取所有结点列表
             kdList = self.transfer_list(self.root)
 
+            # 打印测试
+            # print(kdList)
+
             # 获取所有标签
             for element in kdList:
 
@@ -465,6 +468,9 @@ class KDTree(object):
 
         # 树的总结点数多于 k 个
         else:
+            # 标签集合
+            label_dict = {}
+
             # 最近的 k 个结点列表
             node_list = []
 
@@ -472,7 +478,31 @@ class KDTree(object):
             node_visited = set()
 
             # 迭代寻找 k 个最近结点
-            return search_k_node(self.root, self.root, item, k, node_list, node_visited)
+            kdList = search_k_node(self.root, self.root, item, k, node_list, node_visited)
+
+            # 打印测试
+            # print(kdList)
+
+            # 获取所有标签
+            for element in kdList:
+
+                # 当前标签已存在时
+                if element[2] in label_dict:
+
+                    # 标签数目加一
+                    label_dict[element[2]] += 1
+
+                # 当前标签不存在时
+                else:
+
+                    # 创建该标签
+                    label_dict[element[2]] = 1
+
+            # 根据标签数目排序
+            sorted_label = sorted(label_dict.items(), key=lambda x: x[1], reverse=True)
+
+            # 返回标签列表
+            return sorted_label[0][0]
 
 # 主函数
 if __name__ == '__main__':
@@ -492,8 +522,8 @@ if __name__ == '__main__':
     Time2 = time.time()
 
     # 最近的 k 个元素的投票结果
-    k_nodes = kd_tree.search_nearest_node([12, 7], 3)
-    print(k_nodes)
+    k_nodes = kd_tree.search_nearest_node([12, 7], 4)
+
     # 获取当前时间
     Time3 = time.time()
 
