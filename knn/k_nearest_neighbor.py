@@ -5,25 +5,27 @@
 
 '''
 训练集: Mnist
-训练集数量: 60000
-测试集数量: 10000
+训练集数量: 1000
+测试集数量: 100
 ---------------
 运行结果:
+k: 5
 非 kd 树
-测试集: 200
-k: 25
-欧式距离:
-    正确率: 97%
-    运行时长: 547.80s
-曼哈顿距离:
-    正确率: 95.5%
-    运行时长: 471.04s
+    正确率: 84.0%
+    运行时长: 3.73s
+kd 树:
+    正确率: 85.0%
+    运行时长: 19.02s
 '''
 
 import pandas as pd
 import numpy as np
 import time
 import knn.kd_tree as kd
+import sys
+
+# 设置最大迭代深度
+sys.setrecursionlimit(10000)
 
 def loadData(fileName):
     '''
@@ -42,7 +44,7 @@ def loadData(fileName):
     # pandas 读取, 更为简便
 
     # 打开文件, 按行读取
-    df = pd.read_csv(fileName, header = None)
+    df = pd.read_csv(fileName, header = None, nrows = 1000)
 
     # 获取数据 list
     dataArr = df.iloc[:, 1:]
@@ -137,8 +139,8 @@ def test_with_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, top
     # 建立 kd 树
     kdRoot = kd.KDTree(trainDataArr, trainLabelArr)
 
-    # 借助 kd 树, 仅测试 200 个样本点
-    for i in range(10):
+    # 借助 kd 树, 仅测试 100 个样本点
+    for i in range(100):
 
         # 当前测试样本向量
         x = np.array(testDataArr)[i]
@@ -152,10 +154,10 @@ def test_with_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, top
             errorCount += 1
 
         # 打印测试进度
-        print('TEST %d:%d' % (i, 10))
+        print('TEST %d:%d' % (i, 100))
 
     # 返回正确率
-    return 1 - (errorCount / 10)
+    return 1 - (errorCount / 100)
 
 def test_without_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK = 25):
     '''
@@ -186,8 +188,8 @@ def test_without_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, 
     # 错误分类样本计数
     errorCount = 0
 
-    # 不借助 kd 树, 仅测试 200 个样本点
-    for i in range(10):
+    # 不借助 kd 树, 仅测试 100 个样本点
+    for i in range(100):
 
         # 当前测试样本向量
         x = testDataMat[i]
@@ -200,10 +202,10 @@ def test_without_kdtree(trainDataArr, trainLabelArr, testDataArr, testLabelArr, 
             errorCount += 1
 
         # 打印测试进度
-        print('TEST %d:%d' % (i, 10))
+        print('TEST %d:%d' % (i, 100))
 
     # 返回正确率
-    return 1 - (errorCount / 10)
+    return 1 - (errorCount / 100)
 
 # 主函数
 if __name__ == '__main__':
@@ -218,7 +220,7 @@ if __name__ == '__main__':
     testData, testLabel = loadData("D:\\Mnist\\mnist_test.csv")
 
     # 测试获得正确率
-    accuracyRate = test_with_kdtree(trainData, trainLabel, testData, testLabel, 25)
+    accuracyRate = test_with_kdtree(trainData, trainLabel, testData, testLabel, 5)
 
     # 获取当前时间, 作为结束时间
     endTime = time.time()
