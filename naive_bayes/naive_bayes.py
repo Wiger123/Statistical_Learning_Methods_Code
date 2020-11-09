@@ -100,8 +100,10 @@ def calcProbability(trainDataArr, trainLabelArr):
     for i in range(len(trainLabelArr)):
         # 获取当前循环所使用的标记
         label = trainLabelArr[i]
+
         # 获取当前要处理的样本
         x = trainDataArr[i]
+
         # 对该样本的每一维特征进行遍历
         for j in range(feature_count):
             # 在矩阵中对应位置加1
@@ -109,17 +111,20 @@ def calcProbability(trainDataArr, trainLabelArr):
             Px_y[label][j][x[j]] += 1
 
     # 对标记集进行遍历, 计算条件概率
-    for i in range(label_count):
+    for label in range(label_count):
         # 循环每一个标记对应的每一个特征
         for j in range(feature_count):
             # 获取 y = label, 第 j 个特征为 0 的个数
             Px_y0 = Px_y[label][j][0]
+
             # 获取 y = label, 第 j 个特征为 1 的个数
             Px_y1 = Px_y[label][j][1]
+
             # 贝叶斯估计: 分子 + λ; 分母 + λ * Sj（为每个特征可取值个数）;
             # λ = 1; Sj =2;
             # P(X[j] = 0 | Y = label) 的条件概率
             Px_y[label][j][0] = np.log((Px_y0 + 1) / (Px_y0 + Px_y1 + 2))
+
             # P(X[j] = 1 | Y = label) 的条件概率
             Px_y[label][j][1] = np.log((Px_y1 + 1) / (Px_y0 + Px_y1 + 2))
 
