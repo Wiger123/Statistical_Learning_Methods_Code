@@ -102,3 +102,59 @@ def calcH_D_A(trainDataArr_DevFeature, trainLabelArr):
 
     #返回得出的条件经验熵
     return H_D_A
+
+def calcBestFeature(trainDataList, trainLabelList):
+    '''
+    计算信息增益最大的特征
+    :param trainDataList: 当前数据集
+    :param trainLabelList: 当前标签集
+    :return: 信息增益最大的特征和最大信息增益值
+    '''
+
+    # 数据集转为数组
+    trainDataArr = np.array(trainDataList)
+
+    # 标签集转为数组
+    # 标签集需要转置
+    # 借用 dodo 一个很好的例子:
+    # a = np.array([1, 2, 3]); b = np.array([1, 2, 3]).T
+    # a[0] = [1, 2, 3]; b[0] = 1, b[1] = 2
+    # 为了调用每一个元素, 标签集需要转置
+    trainLabelArr = np.array(trainLabelList).T
+
+    # 特征数目
+    # shape[0]: 样本数目; shape[1]: 特征数目
+    featureNum = trainDataArr.shape[1]
+
+    # 初始化最大信息增益
+    maxG_D_A = -1
+
+    # 初始化最大信息增益的特征
+    maxFeature = -1
+
+    # 对所有特征遍历计算
+    for feature in range(featureNum):
+
+        # 1. 计算数据集 D 的经验熵 H(D)
+        H_D = calc_H_D(trainLabelArr)
+
+        # 2. 提取列表中 feature 列的数据
+        # trainDataArr[:, feature]: 所有样本第 feature 个特征那的一列数据
+        trainDataArr_DevideByFeature = np.array(trainDataArr[:, feature].flat)
+
+        # 3. 计算条件经验熵 H(D|A)
+        H_D_A = calcH_D_A(trainDataArr_DevideByFeature, trainLabelArr)
+
+        # 4. 计算信息增益率: G(D,A) = H(D) - H(D|A)
+        G_D_A = H_D - H_D_A
+
+        # 5. 更新最大的信息增益与对应的特征
+        if G_D_A > maxG_D_A:
+            # 更新最大信息增益
+            maxG_D_A = G_D_A
+
+            # 更新对应特征
+            maxFeature = feature
+
+    # 返回最大信息增益的特征和最大信息增益
+    return maxFeature, maxG_D_A
