@@ -98,7 +98,7 @@ class SVM:
         self.tolerance = tolerance
 
         # 核函数 (初始化时计算)
-        self.k = self.calcKernel()
+        self.k = self.calc_kernel()
 
         # SVM 中偏置量 b
         self.b = 0
@@ -112,7 +112,7 @@ class SVM:
         # 支持向量索引列表
         self.supportVecIndex = []
 
-    def calcKernel(self):
+    def calc_kernel(self):
         '''
         计算高斯核函数: K(x,z) = exp(- (||x-z||^2) / (2 * σ^2))
         :return: 高斯核矩阵
@@ -160,7 +160,22 @@ class SVM:
         # 初始化 g(xi)
         gxi = 0
 
-    def satisfyKKT(self, i):
+        # 根据书中 a 不等于 0 才参与计算
+        # index 为非零 的 a 下标列表
+        index = [i for i, alpha in enumerate(self.alpha) if alpha != 0]
+
+        # 遍历每一个非零 a
+        for j in index:
+            # 计算 g(xi)
+            gxi += self.alpha[j] * self.trainLabelMat[j] * self.k[j][i]
+
+        # 求和结束后加上偏置 b
+        gxi += self.b
+
+        # 返回 g(xi)
+        return gxi
+
+    def satisfy_KKT(self, i):
         '''
         判断第 i 个 a 是否满足 KKT 条件
         :param i: a 的下标
@@ -197,3 +212,33 @@ class SVM:
 
         # 其他情况均属于不满足 KKT, 返回 False
         return False
+
+    def calc_Ei(self, i):
+        '''
+        根据 7.105 计算 Ei: 函数 g(x) 对输入 xi 的预测值与真实输出 yi 之差
+        :param i: E 下标
+        :return: 计算得到的 E 值
+        '''
+
+        # 计算 g(xi)
+        gxi = self.calc_gxi(i)
+
+        # Ei = g(xi) - yi
+        return gxi - self.trainLabelMat[i]
+
+    def get_alphaJ(self, E1, i):
+        '''
+        SMO 中选择第二个变量
+        :param E1: 第一个变量的 E1
+        :param i: 第一个变量的 a 的下标
+        :return: E2, a2 的下标
+        '''
+
+        # 初始化 E2
+        E2 = 0
+
+        # 初始化 |E1 - E2| = -1
+        max_E1_E2 = -1
+
+        # 初始化第二个变量下标为 -1
+        max_index = -1
