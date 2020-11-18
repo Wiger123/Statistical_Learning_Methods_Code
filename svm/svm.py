@@ -77,6 +77,7 @@ class SVM:
         :param C: 软间隔中的惩罚系数
         :param tolerance: 松弛变量
         '''
+
         # 训练数据集矩阵
         self.trainDataMat = np.mat(trainDataList)
 
@@ -148,3 +149,51 @@ class SVM:
 
         # 返回高斯核矩阵
         return k
+
+    def calc_gxi(self, i):
+        '''
+        g(xi) = Σ aj * yj * K(xi, xj) + b
+        :param i: x 的下标
+        :return: g(xi) 的值
+        '''
+
+        # 初始化 g(xi)
+        gxi = 0
+
+    def satisfyKKT(self, i):
+        '''
+        判断第 i 个 a 是否满足 KKT 条件
+        :param i: a 的下标
+        :return: 是否满足 KKT 条件
+            True: 满足
+            False: 不满足
+        '''
+
+        # g(x): 统计学习方法 7.104
+        gxi = self.calc_gxi(i)
+
+        # yi: 标签
+        yi = self.trainLabelMat[i]
+
+        # 检验是在松弛变量的范围内进行的, 故需要对 a 和 tolerance 进行判断
+        # KKT 条件: 统计学习方法 7.111, 7.112, 7.113
+        # 7.111: yi * g(xi) >= 1
+        # -tolerance < a < tolerance
+        if yi * gxi >= 1 and math.fabs(self.alpha[i]) < self.tolerance:
+            # 满足 KKT
+            return True
+
+        # 7.112: yi * g(xi) = 1, 考虑到松弛变量, 采用绝对值减法
+        # -tolerance < a < C + tolerance
+        elif math.fabs(yi * gxi - 1) < self.tolerance and self.alpha[i] > -self.toler and self.alpha[i] < (self.C + self.toler):
+            # 满足 KKT
+            return True
+
+        # 7.113: yi * g(xi) <= 1
+        # C - tolerance < a < C + tolerance
+        elif yi * gxi <= 1 and math.fabs(self.alpha[i] - self.C) < self.tolerence:
+            # 满足 KKT
+            return True
+
+        # 其他情况均属于不满足 KKT, 返回 False
+        return False
