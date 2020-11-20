@@ -325,7 +325,7 @@ def predict(testDataList, tree):
             # 此时上一行 tree = value[dataVal], 将 tree 定位到了 7, 而 7 不再是一个字典了
             # 这里就可以直接返回 7 了, 如果 tree = value[1], 那就是一个新的子节点, 需要继续遍历下去
             if type(tree).__name__ == 'int':
-                # 返回该节点值，也就是分类值
+                # 返回该节点值, 也就是分类值
                 return tree
 
         # 如果当前value不是字典
