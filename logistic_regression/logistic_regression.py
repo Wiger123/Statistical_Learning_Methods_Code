@@ -9,9 +9,9 @@
 测试集数量: 10000
 ---------------
 运行结果:
-迭代次数: 20
-正确率: 79.64%
-运行时长: 67.38s
+迭代次数: 50
+正确率: 87.14%
+运行时长: 411.27s
 '''
 
 import pandas as pd
@@ -88,6 +88,7 @@ def logistic_regression(trainDataArr, trainLabelArr, iter = 200):
         trainDataArr[i].append(1)
 
     # 列表转为数组形式, 便于计算
+    # 由于 python 运行内存上限, 这里不进行批量转换, 在下面的实际训练过程中, 每次迭代对每次样本进行转换
     # trainDataArr = np.array(trainDataArr)
 
     # 初始化 w, 同时要考虑到 b, 长度也要增加一项
@@ -116,6 +117,10 @@ def logistic_regression(trainDataArr, trainLabelArr, iter = 200):
             # 梯度上升
             # 单步步长乘上求导后的结果即为训练单次变化
             w += h * (xi * yi - (np.exp(wx) * xi) / (1 + np.exp(wx)))
+
+            # 打印训练进度
+            if j % 1000 == 0:
+                print("第 {} 次迭代, 已训练完 {} 个样本".format(i, j))
 
     # 返回训练后的 w
     return w
@@ -164,7 +169,7 @@ if __name__ == '__main__':
     print('END READING DATA')
 
     # 训练获得权重
-    w = logistic_regression(trainData, trainLabel)
+    w = logistic_regression(trainData, trainLabel, 50)
 
     # 测试获得正确率
     print('START TESTING')
