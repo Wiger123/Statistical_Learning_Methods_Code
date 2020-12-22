@@ -39,7 +39,8 @@ def loadData(fileName):
         # 每一行数据按 ',' 进行切割, 返回字段列表
         curLine = line.strip().split(',')
 
-        # 0-9: 标记, 由于是二分任务, 将 >= 5 的作为 1, < 5 为 0
+        # 0-9: 标记, 由于是二分任务, 将 >= 5 的作为 1, < 5 为 0, 准确率为 87.14%
+        # dodo 采用 0 为 1, 其余 1 - 9 为 0 的标注方法, 准确率为 98.91%
         if int(curLine[0]) >= 5:
             labelArr.append(1)
         else:
@@ -156,7 +157,6 @@ def test(testDataArr, testLabelArr, w):
 
 # 主函数
 if __name__ == '__main__':
-
     # 获取当前时间, 作为起始时间
     startTime = time.time()
 
